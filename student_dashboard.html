@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d1117;
+      --surface:  #161b22;
+      --surface2: #1c2333;
+      --border:   #30363d;
+      --text:     #e6edf3;
+      --muted:    #7d8590;
+      --accent:   #58a6ff;
+      --green:    #3fb950;
+      --orange:   #d29922;
+      --red:      #f85149;
+      --radius:   14px;
+      --font:     'DM Sans', sans-serif;
+      --mono:     'DM Mono', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      padding: 32px 24px 60px;
+    }
+
+    /* ── Header ── */
+    .header { text-align: center; margin-bottom: 36px; position: relative; padding-top: 4px; }
+    .header h1 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.4px; }
+    .header .meta {
+      margin-top: 6px;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+    .header .sim-badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 3px 12px;
+      background: rgba(88,166,255,0.12);
+      border: 1px solid rgba(88,166,255,0.3);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .btn-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.15s, border-color 0.15s;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+    .btn-home:hover { color: var(--text); border-color: #484f58; }
+
+    /* ── Top grid ── */
+    .top-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      max-width: 1100px;
+      margin: 0 auto 16px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .card-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* ── Ring card ── */
+    .attendance-card { display: flex; flex-direction: column; }
+    .ring-row { display: flex; align-items: center; gap: 28px; flex: 1; }
+    .ring-wrap { position: relative; flex-shrink: 0; }
+    .ring-wrap svg { display: block; transform: rotate(-90deg); }
+    .ring-center {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .ring-pct { font-size: 1.5rem; font-weight: 600; font-family: var(--mono); line-height: 1; }
+    .ring-sub { font-size: 0.65rem; color: var(--muted); margin-top: 3px; }
+    .ring-stats { display: flex; flex-direction: column; gap: 12px; }
+    .ring-stat-item { display: flex; flex-direction: column; gap: 2px; }
+    .ring-stat-label { font-size: 0.68rem; letter-spacing: 0.5px; color: var(--muted); text-transform: uppercase; }
+    .ring-stat-val { font-family: var(--mono); font-size: 1.15rem; font-weight: 500; }
+
+    /* ── Needed card ── */
+    .needed-card { display: flex; flex-direction: column; }
+    .needed-big { font-family: var(--mono); font-size: 3.2rem; font-weight: 500; line-height: 1; margin-bottom: 8px; }
+    .needed-big.zero   { color: var(--green); }
+    .needed-big.warn   { color: var(--orange); }
+    .needed-big.danger { color: var(--red); }
+    .needed-note { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+
+    /* ── Sim card ── */
+    .sim-card { display: flex; flex-direction: column; gap: 14px; }
+    .sim-fields { display: flex; flex-direction: column; gap: 10px; }
+    .field-group { display: flex; flex-direction: column; gap: 5px; }
+    .field-group label { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.4px; color: var(--muted); }
+    .field-group input[type="number"] {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      padding: 8px 12px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field-group input[type="number"]:focus { border-color: var(--accent); }
+    .sim-actions { display: flex; gap: 8px; }
+    .btn {
+      flex: 1; padding: 9px 16px; border: none; border-radius: 8px;
+      font-family: var(--font); font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:hover  { opacity: 0.85; }
+    .btn-primary { background: var(--accent); color: #0d1117; }
+    .btn-ghost { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+
+    /* ── Bottom / table ── */
+    .bottom-grid { display: grid; grid-template-columns: 1fr; gap: 16px; max-width: 1100px; margin: 0 auto; }
+    .table-card { padding: 0; overflow: hidden; }
+    .table-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); }
+    .table-header h2 { font-size: 0.9rem; font-weight: 600; letter-spacing: 0.5px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    thead tr { background: var(--surface2); }
+    th {
+      padding: 10px 18px; text-align: left;
+      font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.8px; text-transform: uppercase;
+      color: var(--muted);
+    }
+    td { padding: 13px 18px; border-top: 1px solid var(--border); vertical-align: middle; }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .mono { font-family: var(--mono); }
+    .pct-green  { color: var(--green);  font-family: var(--mono); font-weight: 500; }
+    .pct-orange { color: var(--orange); font-family: var(--mono); font-weight: 500; }
+    .pct-red    { color: var(--red);    font-family: var(--mono); font-weight: 500; }
+    .bar-wrap { width: 110px; height: 6px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+    .bar-fill.green  { background: var(--green); }
+    .bar-fill.orange { background: var(--orange); }
+    .bar-fill.red    { background: var(--red); }
+
+    @media (max-width: 820px) {
+      .top-grid { grid-template-columns: 1fr 1fr; }
+      .attendance-card { grid-column: span 2; }
+    }
+    @media (max-width: 560px) {
+      .top-grid { grid-template-columns: 1fr; }
+      .attendance-card { grid-column: span 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <a href="/" class="btn-home">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    Return to Home
+  </a>
+  <h1>Student Attendance Dashboard</h1>
+  <div class="meta">{{ student.roll_number }} &nbsp;·&nbsp; {{ student.student_name }}</div>
+  {% if simulated %}
+  <div class="sim-badge">
+    Simulated &nbsp;·&nbsp; Medical {{ medical_claim }} + Extra {{ extra_claim }}
+  </div>
+  {% endif %}
+</div>
+
+<!-- Top grid -->
+<div class="top-grid">
+
+  <!-- Attendance ring -->
+  <div class="card attendance-card">
+    <div class="card-label">Overall Attendance</div>
+    <div class="ring-row">
+      <div class="ring-wrap">
+        {% set r = 54 %}
+        {% set circ = 2 * 3.14159 * r %}
+        {% set offset = circ - (circ * [display_percentage, 100] | min / 100) %}
+        <svg width="130" height="130" viewBox="0 0 130 130">
+          <circle cx="65" cy="65" r="{{ r }}" stroke="#30363d" stroke-width="10" fill="none"/>
+          <circle cx="65" cy="65" r="{{ r }}"
+            stroke="{% if overall_percentage >= 85 %}#3fb950{% elif overall_percentage >= 75 %}#d29922{% else %}#f85149{% endif %}"
+            stroke-width="10" fill="none" stroke-linecap="round"
+            stroke-dasharray="{{ circ | round(2) }}"
+            stroke-dashoffset="{{ offset | round(2) }}"/>
+        </svg>
+        <div class="ring-center">
+          <span class="ring-pct"
+            style="color:{% if overall_percentage >= 85 %}var(--green){% elif overall_percentage >= 75 %}var(--orange){% else %}var(--red){% endif %};">
+            {{ overall_percentage }}%
+          </span>
+          <span class="ring-sub">attendance</span>
+        </div>
+      </div>
+      <div class="ring-stats">
+        <div class="ring-stat-item">
+          <span class="ring-stat-label">Attended</span>
+          <span class="ring-stat-val">{{ total_attended }}</span>
+        </div>
+        <div class="ring-stat-item">
+          <span class="ring-stat-label">Conducted</span>
+          <span class="ring-stat-val">
+            {% if simulated and effective_conducted != total_conducted %}
+              <span style="text-decoration:line-through;color:var(--muted);font-size:0.85rem;">{{ total_conducted }}</span>
+              &nbsp;{{ effective_conducted }}
+            {% else %}
+              {{ total_conducted }}
+            {% endif %}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Classes needed -->
+  <div class="card needed-card">
+    <div class="card-label">Classes Needed for 85%</div>
+    <div class="needed-big {% if classes_needed == 0 %}zero{% elif classes_needed <= 20 %}warn{% else %}danger{% endif %}">
+      {{ classes_needed }}
+    </div>
+    <div class="needed-note">
+      {% if classes_needed == 0 %}
+        You've met the 85% threshold. Keep it up!
+      {% else %}
+        Attend <strong style="color:var(--text);">{{ classes_needed }}</strong> more consecutive classes to reach the 85% requirement.
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Simulation -->
+  <div class="card sim-card">
+    <div class="card-label">Attendance Simulation</div>
+    <form method="POST" action="/simulate_claim" class="sim-fields">
+      <input type="hidden" name="roll" value="{{ student.roll_number }}"/>
+      <div class="field-group">
+        <label>Medical Claims</label>
+        <input type="number" name="medical_claim" value="{{ medical_claim }}" min="0"/>
+      </div>
+      <div class="field-group">
+        <label>Extracurricular Claims</label>
+        <input type="number" name="extra_claim" value="{{ extra_claim }}" min="0"/>
+      </div>
+      <div class="sim-actions">
+        <button type="submit" class="btn btn-primary">Simulate</button>
+      </div>
+    </form>
+    <form method="POST" action="/reset_dashboard">
+      <input type="hidden" name="roll" value="{{ student.roll_number }}"/>
+      <button type="submit" class="btn btn-ghost" style="width:100%;">Reset</button>
+    </form>
+  </div>
+
+</div>
+
+<!-- Subject table -->
+<div class="bottom-grid">
+  <div class="card table-card">
+    <div class="table-header">
+      <h2>Subject Attendance</h2>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>Teacher</th>
+          <th>Attended</th>
+          <th>Conducted</th>
+          <th>Hours</th>
+          <th>%</th>
+          <th>Progress</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+          {% if r.percentage >= 85 %}{% set color = "green" %}
+          {% elif r.percentage >= 75 %}{% set color = "orange" %}
+          {% else %}{% set color = "red" %}{% endif %}
+          <tr>
+            <td>{{ r.subject_id }} – {{ r.subject_name }}</td>
+            <td style="color:var(--muted);">{{ r.teacher_name }}</td>
+            <td class="mono">{{ r.classes_attended }}</td>
+            <td class="mono">{{ r.classes_conducted }}</td>
+            <td class="mono" style="color:var(--muted);">{{ r.hours_attended }}/{{ r.total_hours }}h</td>
+            <td class="pct-{{ color }}">{{ r.percentage }}%</td>
+            <td>
+              <div class="bar-wrap">
+                <div class="bar-fill {{ color }}" style="width:{{ [r.percentage, 100] | min }}%;"></div>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Teacher Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d1117;
+      --surface:  #161b22;
+      --surface2: #1c2333;
+      --border:   #30363d;
+      --text:     #e6edf3;
+      --muted:    #7d8590;
+      --accent:   #58a6ff;
+      --green:    #3fb950;
+      --radius:   14px;
+      --font:     'DM Sans', sans-serif;
+      --mono:     'DM Mono', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 44px 40px;
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .card-head {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .icon-wrap {
+      width: 44px;
+      height: 44px;
+      background: rgba(88,166,255,0.1);
+      border: 1px solid rgba(88,166,255,0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .icon-wrap svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--accent);
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .card-head h1 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+    .card-head p {
+      font-size: 0.83rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .field label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .field input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.92rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input::placeholder { color: #484f58; }
+    .field input:focus { border-color: var(--accent); }
+    .field .hint {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .field .hint strong {
+      color: #8b949e;
+      font-family: var(--mono);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 11px;
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-submit:hover { opacity: 0.88; }
+    .btn-submit:active { transform: scale(0.98); }
+
+    .back-link {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .back-link a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="card-head">
+    <div class="icon-wrap">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+    </div>
+    <h1>Teacher Portal</h1>
+    <p>Enter your teacher ID to manage attendance records</p>
+  </div>
+
+  <form method="POST" action="/teacher" style="display:flex;flex-direction:column;gap:20px;">
+    <div class="field">
+      <label>Teacher ID</label>
+      <input type="text" name="teacher_id" placeholder="e.g. 101" required/>
+      <span class="hint">Your numeric staff ID &mdash; e.g. <strong>101</strong></span>
+    </div>
+    <button type="submit" class="btn-submit">Open Dashboard</button>
+  </form>
+
+  <div class="back-link">
+    <a href="/">&larr; Back to portal selection</a>
+  </div>
+
+</div>
+
+</body>
+</html>

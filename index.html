@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attendance System</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d1117;
+      --surface:  #161b22;
+      --surface2: #1c2333;
+      --border:   #30363d;
+      --text:     #e6edf3;
+      --muted:    #7d8590;
+      --accent:   #58a6ff;
+      --green:    #3fb950;
+      --radius:   14px;
+      --font:     'DM Sans', sans-serif;
+      --mono:     'DM Mono', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 640px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+
+    /* ── Brand ── */
+    .brand {
+      text-align: center;
+    }
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background: rgba(88,166,255,0.1);
+      border: 1px solid rgba(88,166,255,0.25);
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    .brand-mark svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--accent);
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .brand h1 {
+      font-size: 1.65rem;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+    .brand p {
+      margin-top: 8px;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    /* ── Role cards ── */
+    .role-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      width: 100%;
+    }
+    .role-label {
+      cursor: pointer;
+    }
+    .role-label input[type="radio"] {
+      display: none;
+    }
+    .role-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      transition: border-color 0.2s, background 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .role-content:hover {
+      border-color: #484f58;
+      background: var(--surface2);
+    }
+    .role-label input:checked + .role-content {
+      border-color: var(--accent);
+      background: rgba(88,166,255,0.07);
+    }
+    .role-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 4px;
+    }
+    .role-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--muted);
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .role-label input:checked + .role-content .role-icon svg {
+      stroke: var(--accent);
+    }
+    .role-content h2 {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .role-content p {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── Button ── */
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-submit:hover { opacity: 0.88; }
+    .btn-submit:active { transform: scale(0.98); }
+
+    .form-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    @media (max-width: 480px) {
+      .role-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24">
+        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+        <rect x="9" y="3" width="6" height="4" rx="1"/>
+        <path d="M9 12h6M9 16h4"/>
+      </svg>
+    </div>
+    <h1>Attendance Intelligence System</h1>
+    <p>Choose how you want to access the platform</p>
+  </div>
+
+  <form method="POST" action="/portal" class="form-wrap">
+
+    <div class="role-grid">
+
+      <label class="role-label">
+        <input type="radio" name="role" value="student" required/>
+        <div class="role-content">
+          <div class="role-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          </div>
+          <h2>Student Portal</h2>
+          <p>View attendance, simulate claims, and monitor eligibility</p>
+        </div>
+      </label>
+
+      <label class="role-label">
+        <input type="radio" name="role" value="teacher" required/>
+        <div class="role-content">
+          <div class="role-icon">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <h2>Teacher Portal</h2>
+          <p>Manage attendance and update student records</p>
+        </div>
+      </label>
+
+    </div>
+
+    <button type="submit" class="btn-submit">Enter Dashboard</button>
+
+  </form>
+
+</div>
+
+</body>
+</html>

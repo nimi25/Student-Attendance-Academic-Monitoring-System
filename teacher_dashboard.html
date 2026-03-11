@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Teacher Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d1117;
+      --surface:  #161b22;
+      --surface2: #1c2333;
+      --border:   #30363d;
+      --text:     #e6edf3;
+      --muted:    #7d8590;
+      --accent:   #58a6ff;
+      --green:    #3fb950;
+      --orange:   #d29922;
+      --red:      #f85149;
+      --radius:   14px;
+      --font:     'DM Sans', sans-serif;
+      --mono:     'DM Mono', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      padding: 32px 24px 60px;
+    }
+
+    /* ── Header ── */
+    .header {
+      max-width: 1200px;
+      margin: 0 auto 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .header-left h1 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+    .header-left p {
+      margin-top: 4px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .btn-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .btn-home:hover {
+      color: var(--text);
+      border-color: #484f58;
+    }
+
+    /* ── Table card ── */
+    .table-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .table-head-bar {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .table-head-bar h2 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── Scrollable table ── */
+    .table-scroll {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+      white-space: nowrap;
+    }
+    thead tr {
+      background: var(--surface2);
+    }
+    th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    td {
+      padding: 11px 16px;
+      border-top: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+    .mono { font-family: var(--mono); }
+    .muted { color: var(--muted); }
+
+    /* ── Inline buttons ── */
+    .btn {
+      padding: 5px 12px;
+      border: none;
+      border-radius: 6px;
+      font-family: var(--font);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn:hover  { opacity: 0.82; }
+    .btn-present { background: rgba(63,185,80,0.15);  color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+    .btn-absent  { background: rgba(248,81,73,0.12);  color: var(--red);   border: 1px solid rgba(248,81,73,0.3); }
+    .btn-update  { background: rgba(88,166,255,0.12); color: var(--accent); border: 1px solid rgba(88,166,255,0.3); }
+
+    /* ── Edit number inputs ── */
+    .edit-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .edit-input {
+      width: 60px;
+      padding: 5px 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .edit-input:focus { border-color: var(--accent); }
+
+    /* hide number spinners */
+    .edit-input::-webkit-inner-spin-button,
+    .edit-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .edit-input[type=number] { -moz-appearance: textfield; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <h1>Teacher Dashboard</h1>
+    <p>Manage student attendance and update records</p>
+  </div>
+  <a href="/" class="btn-home">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    Return to Home
+  </a>
+</div>
+
+<!-- Table -->
+<div class="table-wrap">
+  <div class="table-head-bar">
+    <h2>Student Attendance Records</h2>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Roll</th>
+          <th>Student</th>
+          <th>Subject</th>
+          <th>Attended</th>
+          <th>Conducted</th>
+          <th>Mark Present</th>
+          <th>Mark Absent</th>
+          <th>Edit Attended</th>
+          <th>Edit Conducted</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+
+          <td class="mono muted">{{ r.roll_number }}</td>
+          <td>{{ r.student_name }}</td>
+          <td class="muted">{{ r.subject_id }} – {{ r.subject_name }}</td>
+          <td class="mono">{{ r.classes_attended }}</td>
+          <td class="mono">{{ r.classes_conducted }}</td>
+
+          <!-- Mark Present -->
+          <td>
+            <form method="POST" action="/mark_present">
+              <input type="hidden" name="attendance_id" value="{{ r.attendance_id }}">
+              <input type="hidden" name="teacher_id"    value="{{ teacher_id }}">
+              <button type="submit" class="btn btn-present">Present</button>
+            </form>
+          </td>
+
+          <!-- Mark Absent -->
+          <td>
+            <form method="POST" action="/mark_absent">
+              <input type="hidden" name="attendance_id" value="{{ r.attendance_id }}">
+              <input type="hidden" name="teacher_id"    value="{{ teacher_id }}">
+              <button type="submit" class="btn btn-absent">Absent</button>
+            </form>
+          </td>
+
+          <!-- Edit Attended -->
+          <td>
+            <form method="POST" action="/edit_attendance">
+              <input type="hidden" name="attendance_id" value="{{ r.attendance_id }}">
+              <input type="hidden" name="teacher_id"    value="{{ teacher_id }}">
+              <div class="edit-row">
+                <input type="number" name="new_attended"
+                       value="{{ r.classes_attended }}" min="0"
+                       class="edit-input"/>
+                <button type="submit" class="btn btn-update">Save</button>
+              </div>
+            </form>
+          </td>
+
+          <!-- Edit Conducted -->
+          <td>
+            <form method="POST" action="/edit_conducted">
+              <input type="hidden" name="attendance_id" value="{{ r.attendance_id }}">
+              <input type="hidden" name="teacher_id"    value="{{ teacher_id }}">
+              <div class="edit-row">
+                <input type="number" name="new_conducted"
+                       value="{{ r.classes_conducted }}" min="0"
+                       class="edit-input"/>
+                <button type="submit" class="btn btn-update">Save</button>
+              </div>
+            </form>
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>
