@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Student Attendance MIS — ER Diagram</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #f5f7fa;
+    font-family: 'Segoe UI', sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+  #toolbar {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 48px;
+    background: #1A3A6B;
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 20px;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  #toolbar h1 {
+    color: #fff; font-size: 14px; font-weight: 600; letter-spacing: 0.3px;
+    flex: 1;
+  }
+  #toolbar button {
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+    color: #fff; padding: 6px 14px; border-radius: 6px;
+    font-size: 12px; cursor: pointer; transition: background 0.2s;
+  }
+  #toolbar button:hover { background: rgba(255,255,255,0.25); }
+  #canvas-wrap {
+    position: fixed; top: 48px; left: 0; right: 0; bottom: 0;
+    overflow: hidden; cursor: grab;
+  }
+  #canvas-wrap.grabbing { cursor: grabbing; }
+  svg {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+  }
+  .legend {
+    position: fixed; bottom: 16px; left: 16px;
+    background: #fff; border: 1px solid #d0d7e0;
+    border-radius: 10px; padding: 12px 16px;
+    font-size: 12px; color: #333;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .legend-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+  .leg-entity { width: 28px; height: 16px; background: #fffde7; border: 2px solid #b8860b; border-radius: 3px; }
+  .leg-rel    { width: 22px; height: 22px; background: #e8f5e9; border: 2px solid #4caf50; transform: rotate(45deg); flex-shrink:0; }
+  .leg-attr   { width: 28px; height: 16px; background: #fff; border: 2px solid #999; border-radius: 50%; }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <h1>Student Attendance Academic Monitoring System — ER Diagram</h1>
+  <button onclick="resetView()">Reset View</button>
+  <button onclick="zoomIn()">+ Zoom</button>
+  <button onclick="zoomOut()">− Zoom</button>
+</div>
+
+<div id="canvas-wrap" id="wrap">
+  <svg id="svg" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#aaa"/>
+      </marker>
+    </defs>
+    <g id="root">
+      <!-- lines drawn first (behind nodes) -->
+      <g id="lines"></g>
+      <!-- nodes on top -->
+      <g id="nodes"></g>
+    </g>
+  </svg>
+</div>
+
+<div class="legend">
+  <div class="legend-row"><div class="leg-entity"></div> Entity</div>
+  <div class="legend-row"><div class="leg-rel"></div> Relationship</div>
+  <div class="legend-row"><div class="leg-attr"></div> Attribute</div>
+</div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+// Each node: { id, type: 'entity'|'rel'|'attr', label, x, y }
+// Lines connect node ids
+
+const nodes = [
+
+  // ── STUDENTS ──────────────────────────────────────────
+  { id:'students',     type:'entity', label:'Students',          x:160,  y:200 },
+  { id:'s_roll',       type:'attr',   label:'roll_number (PK)',  x:40,   y:100 },
+  { id:'s_name',       type:'attr',   label:'student_name',      x:160,  y:90  },
+
+  // ── TEACHERS ──────────────────────────────────────────
+  { id:'teachers',     type:'entity', label:'Teachers',          x:600,  y:200 },
+  { id:'t_id',         type:'attr',   label:'teacher_id (PK)',   x:530,  y:90  },
+  { id:'t_name',       type:'attr',   label:'teacher_name',      x:680,  y:90  },
+
+  // ── SUBJECTS ──────────────────────────────────────────
+  { id:'subjects',     type:'entity', label:'Subjects',          x:600,  y:480 },
+  { id:'sub_id',       type:'attr',   label:'subject_id (PK)',   x:480,  y:560 },
+  { id:'sub_name',     type:'attr',   label:'subject_name',      x:620,  y:570 },
+  { id:'sub_tid',      type:'attr',   label:'teacher_id (FK)',   x:760,  y:560 },
+
+  // ── ATTENDANCE ────────────────────────────────────────
+  { id:'attendance',   type:'entity', label:'Attendance',        x:160,  y:480 },
+  { id:'att_id',       type:'attr',   label:'attendance_id (PK)',x:40,   y:570 },
+  { id:'att_roll',     type:'attr',   label:'roll_number (FK)',  x:160,  y:600 },
+  { id:'att_sub',      type:'attr',   label:'subject_id (FK)',   x:290,  y:570 },
+  { id:'att_cond',     type:'attr',   label:'classes_conducted', x:40,   y:390 },
+  { id:'att_att',      type:'attr',   label:'classes_attended',  x:290,  y:390 },
+
+  // ── RELATIONSHIPS ─────────────────────────────────────
+  { id:'rel_teaches',  type:'rel',    label:'Teaches',           x:600,  y:340 },
+  { id:'rel_has',      type:'rel',    label:'Has',               x:160,  y:340 },
+  { id:'rel_covers',   type:'rel',    label:'Covers',            x:380,  y:480 },
+
+];
+
+// Cardinality labels on lines: [fromId, toId, fromCard?, toCard?]
+const lines = [
+  // Students attributes
+  ['s_roll',  'students'],
+  ['s_name',  'students'],
+
+  // Teachers attributes
+  ['t_id',    'teachers'],
+  ['t_name',  'teachers'],
+
+  // Subjects attributes
+  ['sub_id',   'subjects'],
+  ['sub_name', 'subjects'],
+  ['sub_tid',  'subjects'],
+
+  // Attendance attributes
+  ['att_id',   'attendance'],
+  ['att_roll', 'attendance'],
+  ['att_sub',  'attendance'],
+  ['att_cond', 'attendance'],
+  ['att_att',  'attendance'],
+
+  // Rel: Teachers –[Teaches]→ Subjects
+  ['teachers',   'rel_teaches', '1'],
+  ['rel_teaches','subjects',    'N'],
+
+  // Rel: Students –[Has]→ Attendance
+  ['students',  'rel_has',    '1'],
+  ['rel_has',   'attendance', 'N'],
+
+  // Rel: Subjects –[Covers]→ Attendance
+  ['subjects',   'rel_covers',  '1'],
+  ['rel_covers', 'attendance',  'N'],
+];
+
+// ─── SVG UTILS ───────────────────────────────────────────────────────────────
+const NS = 'http://www.w3.org/2000/svg';
+const mk = (tag, attrs={}) => {
+  const el = document.createElementNS(NS, tag);
+  for (const [k,v] of Object.entries(attrs)) el.setAttribute(k,v);
+  return el;
+};
+
+// Node dimensions
+const ENT_W=140, ENT_H=38;
+const REL_D=52;   // diamond half-diagonal
+const ATTR_RX=56, ATTR_RY=20;
+
+function nodeCenter(n){ return {x:n.x, y:n.y}; }
+
+function nodeBounds(n){
+  if(n.type==='entity') return {x:n.x-ENT_W/2, y:n.y-ENT_H/2, w:ENT_W, h:ENT_H};
+  if(n.type==='rel')    return {x:n.x-REL_D,   y:n.y-REL_D,   w:REL_D*2, h:REL_D*2};
+  return {x:n.x-ATTR_RX, y:n.y-ATTR_RY, w:ATTR_RX*2, h:ATTR_RY*2};
+}
+
+// Clip a line to the edge of a node
+function clipToEdge(nx,ny,type, x1,y1,x2,y2){
+  const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy)||1;
+  const ux=dx/len, uy=dy/len;
+  if(type==='entity'){
+    const hw=ENT_W/2, hh=ENT_H/2;
+    const tx=hw/Math.abs(ux||0.001), ty=hh/Math.abs(uy||0.001);
+    const t=Math.min(tx,ty);
+    return {x:nx+ux*t, y:ny+uy*t};
+  }
+  if(type==='rel'){
+    const t=REL_D/(Math.abs(ux)+Math.abs(uy)||1);
+    return {x:nx+ux*t, y:ny+uy*t};
+  }
+  // attr ellipse
+  const a=ATTR_RX,b=ATTR_RY;
+  const t=1/Math.hypot(ux/a, uy/b);
+  return {x:nx+ux*t, y:ny+uy*t};
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+const nodeMap = {};
+nodes.forEach(n=>nodeMap[n.id]=n);
+
+const gLines = document.getElementById('lines');
+const gNodes = document.getElementById('nodes');
+
+// Draw lines
+const lineEls = {}; // id -> {line, card1, card2}
+lines.forEach(([aId,bId,ca,cb],idx)=>{
+  const a=nodeMap[aId], b=nodeMap[bId];
+  const line=mk('line',{stroke:'#aaa','stroke-width':'1.8'});
+  gLines.appendChild(line);
+
+  const t1 = ca ? mk('text',{fill:'#1A3A6B','font-size':'13','font-weight':'700','text-anchor':'middle'}) : null;
+  const t2 = cb ? mk('text',{fill:'#1A3A6B','font-size':'13','font-weight':'700','text-anchor':'middle'}) : null;
+  if(t1){ t1.textContent=ca; gLines.appendChild(t1); }
+  if(t2){ t2.textContent=cb; gLines.appendChild(t2); }
+  lineEls[idx]={line,t1,t2,aId,bId,ca,cb};
+});
+
+// Draw nodes
+const nodeEls = {};
+nodes.forEach(n=>{
+  const g = mk('g',{cursor:'move'});
+  let shape, label;
+
+  if(n.type==='entity'){
+    shape = mk('rect',{
+      x:-ENT_W/2, y:-ENT_H/2, width:ENT_W, height:ENT_H,
+      rx:'5', ry:'5',
+      fill:'#fffde7', stroke:'#b8860b', 'stroke-width':'2.2'
+    });
+    label = mk('text',{
+      'text-anchor':'middle', 'dominant-baseline':'central',
+      'font-size':'13.5', 'font-weight':'700', fill:'#5a3a00', 'font-family':'Segoe UI, sans-serif'
+    });
+    label.textContent = n.label;
+  }
+  else if(n.type==='rel'){
+    const d=REL_D;
+    shape = mk('polygon',{
+      points:`0,${-d} ${d},0 0,${d} ${-d},0`,
+      fill:'#e8f5e9', stroke:'#4caf50', 'stroke-width':'2.2'
+    });
+    label = mk('text',{
+      'text-anchor':'middle','dominant-baseline':'central',
+      'font-size':'12','font-weight':'700',fill:'#1b5e20','font-family':'Segoe UI, sans-serif'
+    });
+    label.textContent = n.label;
+  }
+  else {
+    shape = mk('ellipse',{
+      cx:'0',cy:'0',rx:ATTR_RX,ry:ATTR_RY,
+      fill:'#fff',stroke:'#999','stroke-width':'1.8'
+    });
+    label = mk('text',{
+      'text-anchor':'middle','dominant-baseline':'central',
+      'font-size':'11',fill:'#333','font-family':'Segoe UI, sans-serif'
+    });
+    // wrap if PK/FK label long
+    label.textContent = n.label;
+    if(n.label.includes('(PK)')||n.label.includes('(FK)')){
+      label.setAttribute('font-size','10');
+      label.setAttribute('fill','#1A3A6B');
+      label.setAttribute('font-weight','600');
+    }
+  }
+
+  g.appendChild(shape);
+  g.appendChild(label);
+  g.setAttribute('transform',`translate(${n.x},${n.y})`);
+
+  makeDraggable(g, n);
+  nodeEls[n.id] = g;
+  gNodes.appendChild(g);
+});
+
+function updateLines(){
+  Object.values(lineEls).forEach(({line,t1,t2,aId,bId,ca,cb})=>{
+    const a=nodeMap[aId], b=nodeMap[bId];
+    const p1=clipToEdge(a.x,a.y,a.type, a.x,a.y,b.x,b.y);
+    const p2=clipToEdge(b.x,b.y,b.type, b.x,b.y,a.x,a.y);
+    line.setAttribute('x1',p1.x); line.setAttribute('y1',p1.y);
+    line.setAttribute('x2',p2.x); line.setAttribute('y2',p2.y);
+
+    if(t1){
+      const mx=p1.x+(p2.x-p1.x)*0.15, my=p1.y+(p2.y-p1.y)*0.15;
+      const perp=Math.atan2(p2.y-p1.y,p2.x-p1.x)+Math.PI/2;
+      t1.setAttribute('x', mx+Math.cos(perp)*14);
+      t1.setAttribute('y', my+Math.sin(perp)*14);
+    }
+    if(t2){
+      const mx=p1.x+(p2.x-p1.x)*0.85, my=p1.y+(p2.y-p1.y)*0.85;
+      const perp=Math.atan2(p2.y-p1.y,p2.x-p1.x)+Math.PI/2;
+      t2.setAttribute('x', mx+Math.cos(perp)*14);
+      t2.setAttribute('y', my+Math.sin(perp)*14);
+    }
+  });
+}
+
+updateLines();
+
+// ─── DRAG NODES ──────────────────────────────────────────────────────────────
+function makeDraggable(g, n){
+  let dragging=false, ox=0,oy=0;
+  g.addEventListener('mousedown', e=>{
+    if(e.button!==0) return;
+    dragging=true;
+    const svgP=svgPoint(e);
+    ox=svgP.x-n.x; oy=svgP.y-n.y;
+    e.stopPropagation();
+  });
+  window.addEventListener('mousemove', e=>{
+    if(!dragging) return;
+    const svgP=svgPoint(e);
+    n.x=svgP.x-ox; n.y=svgP.y-oy;
+    g.setAttribute('transform',`translate(${n.x},${n.y})`);
+    updateLines();
+  });
+  window.addEventListener('mouseup', ()=>{ dragging=false; });
+}
+
+// ─── PAN / ZOOM ──────────────────────────────────────────────────────────────
+const root   = document.getElementById('root');
+const wrap   = document.getElementById('canvas-wrap');
+const svgEl  = document.getElementById('svg');
+
+let tx=60, ty=20, scale=1;
+let panning=false, panX=0,panY=0;
+
+function applyTransform(){
+  root.setAttribute('transform',`translate(${tx},${ty}) scale(${scale})`);
+}
+applyTransform();
+
+wrap.addEventListener('mousedown', e=>{
+  if(e.target===svgEl || e.target===root || e.target.tagName==='svg'){
+    panning=true; panX=e.clientX-tx; panY=e.clientY-ty;
+    wrap.classList.add('grabbing');
+  }
+});
+window.addEventListener('mousemove', e=>{
+  if(!panning) return;
+  tx=e.clientX-panX; ty=e.clientY-panY;
+  applyTransform();
+});
+window.addEventListener('mouseup', ()=>{ panning=false; wrap.classList.remove('grabbing'); });
+
+wrap.addEventListener('wheel', e=>{
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? 0.9 : 1.1;
+  const rect = svgEl.getBoundingClientRect();
+  const mx=(e.clientX-rect.left-tx)/scale;
+  const my=(e.clientY-rect.top-ty)/scale;
+  scale=Math.max(0.3,Math.min(3,scale*delta));
+  tx = e.clientX-rect.left - mx*scale;
+  ty = e.clientY-rect.top  - my*scale;
+  applyTransform();
+},{passive:false});
+
+function svgPoint(e){
+  const rect=svgEl.getBoundingClientRect();
+  return { x:(e.clientX-rect.left-tx)/scale, y:(e.clientY-rect.top-ty)/scale };
+}
+
+function resetView(){ tx=60; ty=20; scale=1; applyTransform(); }
+function zoomIn(){  scale=Math.min(3, scale*1.2); applyTransform(); }
+function zoomOut(){ scale=Math.max(0.3,scale/1.2); applyTransform(); }
+</script>
+</body>
+</html>
